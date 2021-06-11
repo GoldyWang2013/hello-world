@@ -26,28 +26,36 @@ using System.Diagnostics;
 using Fx.Common.Entity;
 using Fx.Common.Tips;
 
-namespace Fx.Common.Entity {
+namespace Fx.Common.Entity
+{
 
+    /// <summary>
+    /// CEntity
+    /// </summary>
     [DataContract]
     public partial class CEntity : CBaseEntity,
         IBaseEntity, INotifyPropertyChanged, IEntity, IEditableObject, IComparable // Component : ICloneable 
     {
 
-        public virtual int CompareTo(object obj) {
+        public virtual int CompareTo(object obj)
+        {
             return 0;
         }
         // TODO:ConcurentCheckMode 
         //---------------------------------------------------------------------
         public virtual TPersistState PersistState { get; set; }
-        public bool Inability {
+        public bool Inability
+        {
             get { return PersistState == TPersistState.MarkDeleted || PersistState == TPersistState.Detached; }
         }
         public TConcurentCheckMode ConcurentCheckMode { get; set; }
         //---------------------------------------------------------------------
-        static CEntity() {
+        static CEntity()
+        {
         }
         //---------------------------------------------------------------------
-        public static void RegisterClass(Type entityType, Type dataAccessType) {
+        public static void RegisterClass(Type entityType, Type dataAccessType)
+        {
             TRegisterInfo r = new TRegisterInfo();
             r.EntityType = entityType;
             r.DataAccessType = dataAccessType;
@@ -55,34 +63,39 @@ namespace Fx.Common.Entity {
         }
 
         //---------------------------------------------------------------------
-        public CEntity() {
+        public CEntity()
+        {
             InitObject();
         }
         //---------------------------------------------------------------------
-        public CEntity(CEntityContext ctx) {
+        public CEntity(CEntityContext ctx)
+        {
             Context = ctx;
             InitObject();
         }
         //---------------------------------------------------------------------
-        public CEntity(CEntity parent) {
+        public CEntity(CEntity parent)
+        {
             Parent = parent;
             InitObject();
         }
         //---------------------------------------------------------------------
-        private void InitObject() {
+        private void InitObject()
+        {
             InitMembers();
             Id = CreateCoid();
             PersistState = TPersistState.Added;
             HasSelectedField = true;
             IsMarkDelete = false;
-            TODO:RegisterValidators
+        TODO: RegisterValidators
             RegisterValidators();
         }
         //----------------------------------------------------------
-        public virtual string CreateCoid() {
+        public virtual string CreateCoid()
+        {
             string coidPrefix;
             TMetaEntity meta = GetMetaEntity(this.GetType());
-            if(meta != null)
+            if (meta != null)
                 coidPrefix = meta.MetaTable.CoidPrefix;
             else
                 coidPrefix = String.Empty;
@@ -90,41 +103,50 @@ namespace Fx.Common.Entity {
             return TCoid.CreateCoid(coidPrefix);
         }
         //----------------------------------------------------------
-        public virtual void GetNewCoid() {
+        public virtual void GetNewCoid()
+        {
             Id = CreateCoid();
         }
         //----------------------------------------------------------
-        public virtual void InitMembers() {
+        public virtual void InitMembers()
+        {
             TMetaEntity me = GetMetaEntity(this.GetType());
-            if(me == null)
+            if (me == null)
                 return;
 
             TMetaTable mt = me.MetaTable;
-            foreach(TMetaColumn mc in mt.FullValueColumns) {
+            foreach (TMetaColumn mc in mt.FullValueColumns)
+            {
                 TDataType dataType = mc.DataType;
-                if(dataType == TDataType.DateTime || dataType == TDataType.Date) {
+                if (dataType == TDataType.DateTime || dataType == TDataType.Date)
+                {
                     object nullValue = TConvert.GetNullValue(dataType);
                     this.SetEpoPorpertyValue(mc, nullValue);
                 }
             }
         }
         //---------------------------------------------------------------------
-        public virtual void SetDefaultValue() {
+        public virtual void SetDefaultValue()
+        {
         }
         //----------------------------------------------------------
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return base.GetHashCode();
         }
         //---------------------------------------------------------
-        public override string ToString() {
+        public override string ToString()
+        {
             return Id;
         }
         //---------------------------------------------------------
         protected CDataAccess m_DataAccess;
-        public virtual CDataAccess DataAccess {
-            get {
+        public virtual CDataAccess DataAccess
+        {
+            get
+            {
                 //TODO: find is there any override CreateDataAccess method?
-                if(m_DataAccess != null)
+                if (m_DataAccess != null)
                     return m_DataAccess;
 
                 m_DataAccess = GetDataAccess();
@@ -134,15 +156,17 @@ namespace Fx.Common.Entity {
         }
 
         //---------------------------------------------------------
-        public virtual CDataAccess GetDataAccess() {
-            if(Context == null)
+        public virtual CDataAccess GetDataAccess()
+        {
+            if (Context == null)
                 return null;
 
             Type type = this.GetType();
             TMetaEntity meta = GetMetaEntity(type);
 
             CDataAccess access = Context.AccessCache.GetDataAccess(meta);
-            if(access == null) {
+            if (access == null)
+            {
                 //TODO: DataAccess comes first from override method, then MetaEntity
                 // find is there any override CreateDataAccess in exactly that hierarchy level?
                 access = CreateDataAccess();
@@ -153,39 +177,46 @@ namespace Fx.Common.Entity {
             return access;
         }
         //---------------------------------------------------------
-        public virtual CDataAccess CreateDataAccess() {
+        public virtual CDataAccess CreateDataAccess()
+        {
             //TODO: find is there any override CreateDataAccess
             return new CDataAccess(Context);
         }
         //---------------------------------------------------------
-        public virtual void Load() {
+        public virtual void Load()
+        {
             throw new Exception("The method  is not implemented.");
         }
         //----------------------------------------------------------
-        public virtual void Load(Guid guid) {
+        public virtual void Load(Guid guid)
+        {
             throw new Exception("The method  is not implemented.");
         }
         //----------------------------------------------------------
-        public virtual void Load(int no) {
+        public virtual void Load(int no)
+        {
             //throw new Exception("The method  is not implemented.");
             BeforeLoad();
             Type t2 = this.GetType();
-            while(t2 != typeof(CEntity)) {
+            while (t2 != typeof(CEntity))
+            {
                 TMetaEntity me2 = GetMetaEntity(t2);
                 TMetaTable mt2 = me2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
 
                 ///单表继承--单表存贮 
-                if(inheritType == TInheritMappingType.TablePerConcreteClass) {
+                if (inheritType == TInheritMappingType.TablePerConcreteClass)
+                {
                     Load(no, me2);
-                    if(IsBakMode)
+                    if (IsBakMode)
                         AcceptChanges(me2);
                     break;
                 }
                 /// 多表继承--分表存贮
-                else if(inheritType == TInheritMappingType.TablePerSubClass) {
+                else if (inheritType == TInheritMappingType.TablePerSubClass)
+                {
                     Load(no, me2);
-                    if(IsBakMode)
+                    if (IsBakMode)
                         AcceptChanges(me2);
                     t2 = t2.BaseType;
                 }
@@ -194,7 +225,8 @@ namespace Fx.Common.Entity {
             AfterLoad();
         }
         //----------------------------------------------------------
-        public void Load(int no, TMetaEntity me) {
+        public void Load(int no, TMetaEntity me)
+        {
             CDataAccess access = Context.GetDataAccess(me);
             access.Context = this.Context;
             DataTable dataTable = access.SelectByNo(no);
@@ -209,26 +241,30 @@ namespace Fx.Common.Entity {
         //}
         //----------------------------------------------------------
         // 支持继承
-        public virtual void Load(string id) {
+        public virtual void Load(string id)
+        {
             BeforeLoad();
             Type t2 = this.GetType();
-            while(t2 != typeof(CEntity)) {
+            while (t2 != typeof(CEntity))
+            {
                 TMetaEntity me2 = GetMetaEntity(t2);
                 TMetaTable mt2 = me2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
 
                 ///单表继承--单表存贮 
-                if(inheritType == TInheritMappingType.TablePerConcreteClass) {
+                if (inheritType == TInheritMappingType.TablePerConcreteClass)
+                {
                     Load(id, me2);
-                    if(IsBakMode)
+                    if (IsBakMode)
                         AcceptChanges(me2);
 
                     break;
                 }
                 /// 多表继承--分表存贮
-                else if(inheritType == TInheritMappingType.TablePerSubClass) {
+                else if (inheritType == TInheritMappingType.TablePerSubClass)
+                {
                     Load(id, me2);
-                    if(IsBakMode)
+                    if (IsBakMode)
                         AcceptChanges(me2);
                     t2 = t2.BaseType;
                 }
@@ -237,65 +273,82 @@ namespace Fx.Common.Entity {
             AfterLoad();
         }
         //----------------------------------------------------------
-        public void Load(string id, TMetaEntity me) {
+        public void Load(string id, TMetaEntity me)
+        {
             CDataAccess access = Context.GetDataAccess(me);
             access.Context = this.Context;
             DataTable dataTable = access.SelectById(id);
             Load(dataTable, me);
         }
         //----------------------------------------------------------
-        private void Load(DataTable table, TMetaEntity me) {
+        private void Load(DataTable table, TMetaEntity me)
+        {
             TMetaTable mt = me.MetaTable;
-            if(table.Rows.Count == 0) {
-                if(mt.InheritMappingType == TInheritMappingType.TablePerConcreteClass)
+            if (table.Rows.Count == 0)
+            {
+                if (mt.InheritMappingType == TInheritMappingType.TablePerConcreteClass)
                     throw new TFetchNoneException(this.GetType().ToString() + " Fetch None");
             }
 
-            if(table.Rows.Count == 1) {
+            if (table.Rows.Count == 1)
+            {
                 Load(table.Rows[0], me);
-            } else if(table.Rows.Count > 1) {
+            }
+            else if (table.Rows.Count > 1)
+            {
                 StringBuilder sb = new StringBuilder();
-                for(int i = 0; i < table.Rows.Count; i++)
+                for (int i = 0; i < table.Rows.Count; i++)
                     sb.AppendLine(table.Rows[i]["ID"].ToString());
                 throw new TFetchMoreException(String.Format("{0}--Fetch More than one row{1}{2}", GetType(), Environment.NewLine, sb));
             }
         }
         //----------------------------------------------------------
-        private void Load(DataRow row, TMetaEntity me) {
+        private void Load(DataRow row, TMetaEntity me)
+        {
             Pull(this, row, me);
             //if (IsBakMode)
             //    AcceptChanges();
         }
         //---------------------------------------------------------------------
-        public virtual void Pull(CEntity e, DataRow row, TMetaEntity me) {
+        public virtual void Pull(CEntity e, DataRow row, TMetaEntity me)
+        {
             TInheritMappingType inheritType = me.MetaTable.InheritMappingType;
-            if(inheritType == TInheritMappingType.TablePerConcreteClass) {
-                foreach(TMetaColumn mc in me.MetaTable.FullValueColumns)
+            if (inheritType == TInheritMappingType.TablePerConcreteClass)
+            {
+                foreach (TMetaColumn mc in me.MetaTable.FullValueColumns)
                     Pull(e, row, mc);
-            } else if(inheritType == TInheritMappingType.TablePerSubClass) {
-                foreach(TMetaColumn mc in me.MetaTable.ValueColumnsWithId)
+            }
+            else if (inheritType == TInheritMappingType.TablePerSubClass)
+            {
+                foreach (TMetaColumn mc in me.MetaTable.ValueColumnsWithId)
                     Pull(e, row, mc);
             }
         }
         //----------------------------------------------------------
-        public virtual void Load(TFilterCollection filters) {
+        public virtual void Load(TFilterCollection filters)
+        {
             DataTable dataTable = DataAccess.Select(filters);
             Load(dataTable);
         }
         //----------------------------------------------------------
-        public virtual void Load(DataTable tbl) {
+        public virtual void Load(DataTable tbl)
+        {
             BeforeLoad();
-            if(tbl.Rows.Count == 0) {
+            if (tbl.Rows.Count == 0)
+            {
                 //SimpleLog.Write(this.GetType().ToString() + " Fetch None");
                 throw new TFetchNoneException(this.GetType().ToString() + " Fetch None");
-            } else if(tbl.Rows.Count == 1)
+            }
+            else if (tbl.Rows.Count == 1)
                 Load(tbl.Rows[0]);
 
-            else if(tbl.Rows.Count > 1) {
+            else if (tbl.Rows.Count > 1)
+            {
                 StringBuilder sb = new StringBuilder();
-                for(int i = 0; i < tbl.Rows.Count; i++) {
+                for (int i = 0; i < tbl.Rows.Count; i++)
+                {
                     var column = tbl.Columns["ID"];
-                    if(column != null)
+                    if (column != null)
                         sb.AppendLine(tbl.Rows[i][column].ToString());
                 }
                 string msg = sb.ToString();
@@ -304,36 +357,43 @@ namespace Fx.Common.Entity {
             }
         }
         //---------------------------------------------------------------------
-        public virtual void Load(CEntity entity) {
+        public virtual void Load(CEntity entity)
+        {
             throw new NotImplementedException();
         }
         //----------------------------------------------------------
-        public virtual void BeforeLoad() {
+        public virtual void BeforeLoad()
+        {
         }
         //----------------------------------------------------------
-        public virtual void AfterLoad() {
+        public virtual void AfterLoad()
+        {
         }
         //----------------------------------------------------------
-        public virtual void Load(DataRow row) {
+        public virtual void Load(DataRow row)
+        {
             Pull(this, row);
             PersistState = TPersistState.Opened;
 
-            if(IsBakMode)
+            if (IsBakMode)
                 AcceptChanges();
 
             AfterLoad();
         }
         //---------------------------------------------------------------------
-        public virtual void Pull(CEntity e, DataRow row) {
+        public virtual void Pull(CEntity e, DataRow row)
+        {
             TMetaEntity meta = GetMetaEntity(this.GetType());
-            foreach(TMetaColumn mc in meta.MetaTable.FullValueColumns) {
-                if(!row.Table.Columns.Contains(mc.ColumnName))
+            foreach (TMetaColumn mc in meta.MetaTable.FullValueColumns)
+            {
+                if (!row.Table.Columns.Contains(mc.ColumnName))
                     continue;
                 Pull(e, row, mc);
             }
         }
         //---------------------------------------------------------------------
-        public virtual void Pull(CEntity ety, DataRow row, TMetaColumn mc) {
+        public virtual void Pull(CEntity ety, DataRow row, TMetaColumn mc)
+        {
             string columnName = mc.ColumnName;
             //if(columnName=="A1623") {
             //    Debug.WriteLine("XXX");
@@ -342,8 +402,9 @@ namespace Fx.Common.Entity {
 
             //TODO: how to know nullable property
             /// System.Nullable     int? No;
-            if(mc.IsGenericType) {
-                if(v0 == DBNull.Value)
+            if (mc.IsGenericType)
+            {
+                if (v0 == DBNull.Value)
                     ety.SetEpoPorpertyValue(mc, null);
                 else
                     ety.SetEpoPorpertyValue(mc, v0);
@@ -351,7 +412,8 @@ namespace Fx.Common.Entity {
             }
 
             object customNullValue = mc.MappingAttribute.NullValue;
-            if(customNullValue == null) {
+            if (customNullValue == null)
+            {
                 object v1 = TConvert.DbValue2DataValue(mc.DataType, v0);    /// most hit here!
                 ety.SetEpoPorpertyValue(mc, v1);
                 return;
@@ -359,33 +421,42 @@ namespace Fx.Common.Entity {
             /// CustomNullValue
             //TODO:  customNullValue!=null issues, not finished....
             Type underlyingType = mc.UnderlyingType;
-            if(customNullValue.GetType() != underlyingType) {
-                if(underlyingType == typeof(Decimal)) {
+            if (customNullValue.GetType() != underlyingType)
+            {
+                if (underlyingType == typeof(Decimal))
+                {
                     // float to decimal string to decimal
                     Decimal d = Convert.ToDecimal(customNullValue);
                     object v2 = TConvert.DbValue2DataValue(underlyingType, row[columnName], d);
                     ety.SetEpoPorpertyValue(mc, v2);
-                } else
+                }
+                else
                     throw new TException("nullValue.GetType() differ value.GetType");
-            } else {
+            }
+            else
+            {
                 object v3 = TConvert.DbValue2DataValue(underlyingType, row[columnName], customNullValue);
                 ety.SetEpoPorpertyValue(mc, v3);
             }
         }
         //----------------------------------------------------------
-        public virtual void InitReSubmit() {
+        public virtual void InitReSubmit()
+        {
             PersistState = TPersistState.Added;
         }
         //----------------------------------------------------------
-        public virtual void BeforeSave() {
+        public virtual void BeforeSave()
+        {
             ///******
         }
         //----------------------------------------------------------
-        public virtual void AfterSave() {
+        public virtual void AfterSave()
+        {
             // Fire Event
             IBindingList bList = this.Owner;
             CEntityCollection entities = bList as CEntityCollection;
-            if(entities != null) {
+            if (entities != null)
+            {
                 var arg = new TEntityChangedEventArgs();
                 arg.Entity = this;
                 //rxArgs.EntityChangeType = TEntityChangeType.Add;
@@ -393,16 +464,18 @@ namespace Fx.Common.Entity {
             }
         }
         //----------------------------------------------------------
-        public virtual void Save() {
-            if(Context == null)
+        public virtual void Save()
+        {
+            if (Context == null)
                 throw new TException("Context is null");
             BeforeSave();
             SaveCore();
             AfterSave();
         }
         //----------------------------------------------------------
-        private void SaveCore() {
-            if(PersistState == TPersistState.OpenMemory)
+        private void SaveCore()
+        {
+            if (PersistState == TPersistState.OpenMemory)
                 PersistState = TPersistState.Added;
 
             TMetaEntity meta = GetMetaEntity(this.GetType());
@@ -412,24 +485,24 @@ namespace Fx.Common.Entity {
             // 在此函数中，去进一步区分MappingType
             // NG
 
-            if(inheritType == TInheritMappingType.TablePerConcreteClass)
+            if (inheritType == TInheritMappingType.TablePerConcreteClass)
                 SaveTablePerConcreteClass(meta);
 
-            else if(inheritType == TInheritMappingType.TablePerSubClass)
+            else if (inheritType == TInheritMappingType.TablePerSubClass)
                 SaveTablePerSubClass();
 
 
-            if(PersistState == TPersistState.Added)
+            if (PersistState == TPersistState.Added)
                 PersistState = TPersistState.Opened;
 
-            else if(PersistState == TPersistState.Opened)
+            else if (PersistState == TPersistState.Opened)
                 PersistState = TPersistState.Opened;
 
-            else if(PersistState == TPersistState.Modified)
+            else if (PersistState == TPersistState.Modified)
                 PersistState = TPersistState.Opened;
 
 
-            else if(PersistState == TPersistState.MarkDeleted)
+            else if (PersistState == TPersistState.MarkDeleted)
                 PersistState = TPersistState.Detached;
 
 
@@ -439,13 +512,17 @@ namespace Fx.Common.Entity {
         }
         //----------------------------------------------------------
         // 同表储存
-        private void SaveTablePerConcreteClass(TMetaEntity meta) {
-            try {
+        private void SaveTablePerConcreteClass(TMetaEntity meta)
+        {
+            try
+            {
                 // PerConcrete与PerSubClass同样都调用函数Save(meta)
                 // 在此函数中，去进一步区分MappingType
                 // NG
                 Save(meta);
-            } catch(TDataSilentlyChangedException e1) {
+            }
+            catch (TDataSilentlyChangedException e1)
+            {
                 string trace = TEntityConcurrencyTrace.Trace(this, meta);
                 SimpleLog.Write(trace);
                 SimpleLog.Write(e1);
@@ -454,18 +531,23 @@ namespace Fx.Common.Entity {
         }
         //----------------------------------------------------------
         // 分表储存
-        private void SaveTablePerSubClass() {
+        private void SaveTablePerSubClass()
+        {
             Type t2 = this.GetType();
-            while(t2 != typeof(CEntity)) {
+            while (t2 != typeof(CEntity))
+            {
                 TMetaEntity meta2 = GetMetaEntity(t2);
                 TMetaTable mt2 = meta2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
-                try {
+                try
+                {
                     // PerConcrete与PerSubClass同样都调用函数Save(meta)
                     // 在此函数中，去进一步区分MappingType
                     // NG
                     Save(meta2);
-                } catch(TDataSilentlyChangedException e2) {
+                }
+                catch (TDataSilentlyChangedException e2)
+                {
                     string trace = TEntityConcurrencyTrace.Trace(this, meta2);
                     SimpleLog.Write(trace);
                     SimpleLog.Write(e2);
@@ -475,7 +557,8 @@ namespace Fx.Common.Entity {
             }
         }
         //----------------------------------------------------------
-        public void Save(TMetaEntity me) {
+        public void Save(TMetaEntity me)
+        {
             // PerConcrete与PerSubClass同样都调用函数Save(meta)
             // 在此函数中，去进一步区分MappingType
             // NG
@@ -490,15 +573,20 @@ namespace Fx.Common.Entity {
             TDataTable table = Context.CreateDataTable(mt);
             TDataRow row = table.CreateDataRow();
 
-            if(PersistState == TPersistState.Added) {
+            if (PersistState == TPersistState.Added)
+            {
                 //FillRow(me, row, this);
                 this.Push(row, me);
                 table.Rows.Add(row);
                 access.InsertRow(table);
                 AcceptChanges(me);
-            } else if(PersistState == TPersistState.Opened || PersistState == TPersistState.Modified) {
-                if(me.MetaTable.InheritMappingType == TInheritMappingType.TablePerSubClass) {
-                    if(!access.ExistId(Id)) {
+            }
+            else if (PersistState == TPersistState.Opened || PersistState == TPersistState.Modified)
+            {
+                if (me.MetaTable.InheritMappingType == TInheritMappingType.TablePerSubClass)
+                {
+                    if (!access.ExistId(Id))
+                    {
                         //FillRow(me, row, this);
                         this.Push(row, me);
                         table.Rows.Add(row);
@@ -508,7 +596,8 @@ namespace Fx.Common.Entity {
                     }
                 }
 
-                if(IsBakMode) {
+                if (IsBakMode)
+                {
                     //FillRow(me, row, this.Bak1);
                     this.Bak1.Push(row, me);
                     table.Rows.Add(row);
@@ -522,7 +611,9 @@ namespace Fx.Common.Entity {
                 SaveColumnsBrutally(me);    ///
 
                 AcceptChanges(me);
-            } else if(PersistState == TPersistState.MarkDeleted) {
+            }
+            else if (PersistState == TPersistState.MarkDeleted)
+            {
                 //FillRow(me, row, this.Bak1);
                 this.Bak1.Push(row, me);
                 table.Rows.Add(row);
@@ -533,18 +624,21 @@ namespace Fx.Common.Entity {
             }
         }
         //---------------------------------------------------------------------
-        private void SaveColumnsBrutally(TMetaEntity me) {
+        private void SaveColumnsBrutally(TMetaEntity me)
+        {
             TMetaTable mt = me.MetaTable;
             CDataAccess access = Context.GetDataAccess(me);
             access.Context = this.Context;
             string tableName = mt.TableName;
-            foreach(TMetaColumn mc in mt.Columns) {
-                if(!mc.IsBrutallySave)
+            foreach (TMetaColumn mc in mt.Columns)
+            {
+                if (!mc.IsBrutallySave)
                     continue;
 
                 object v = GetEpoPropertyValue(mc);
                 string strValue = null;
-                switch(mc.DataType) {
+                switch (mc.DataType)
+                {
                     case TDataType.Int32:
                     case TDataType.Int64:
                     case TDataType.Int16:
@@ -569,29 +663,36 @@ namespace Fx.Common.Entity {
             }
         }
         //---------------------------------------------------------------------
-        public virtual void Push(DataRow row, TMetaEntity me) {
+        public virtual void Push(DataRow row, TMetaEntity me)
+        {
             TMetaTable mt = me.MetaTable;
             TInheritMappingType inheritType = me.MetaTable.InheritMappingType;
-            if(inheritType == TInheritMappingType.TablePerConcreteClass) {
+            if (inheritType == TInheritMappingType.TablePerConcreteClass)
+            {
                 Push(row, mt.FullValueColumns);
-            } else if(inheritType == TInheritMappingType.TablePerSubClass) {
+            }
+            else if (inheritType == TInheritMappingType.TablePerSubClass)
+            {
                 Push(row, mt.ValueColumns);
             }
         }
         //---------------------------------------------------------------------
-        public virtual void Push(DataRow row, TMetaColumnCollection metaColumns) {
-            foreach(TMetaColumn mc in metaColumns)
+        public virtual void Push(DataRow row, TMetaColumnCollection metaColumns)
+        {
+            foreach (TMetaColumn mc in metaColumns)
                 this.Push(row, mc);
         }
         //---------------------------------------------------------------------
-        public virtual void Push(DataRow row) {
+        public virtual void Push(DataRow row)
+        {
             TMetaEntity me = GetMetaEntity(this.GetType());
             //FillRow(me, row, e);
             this.Push(row, me);
         }
         //---------------------------------------------------------------------
-        public virtual void Push(DataRow row, TMetaColumn mc) {
-            if(mc.IsNotSave || mc.IsBrutallySave)
+        public virtual void Push(DataRow row, TMetaColumn mc)
+        {
+            if (mc.IsNotSave || mc.IsBrutallySave)
                 return;
 
             string columnName = mc.ColumnName;
@@ -599,83 +700,99 @@ namespace Fx.Common.Entity {
             //    Debug.WriteLine("Xxx");
             //}
             DataColumn dataColumn = row.Table.Columns[columnName];
-            if(dataColumn == null)
+            if (dataColumn == null)
                 throw new TException(this.GetType().FullName + " Column-'" + columnName + "' Missing");
 
             var dbValue = this.GetDbValue(mc);
             row[columnName] = dbValue;
         }
         //--------------------------------------------------------
-        public void Fill(TMetaColumnCollection keyColumns) {
-            foreach(TMetaColumn mc in keyColumns) {
+        public void Fill(TMetaColumnCollection keyColumns)
+        {
+            foreach (TMetaColumn mc in keyColumns)
+            {
                 var dbValue = GetDbValue(mc);
                 mc.DbValue = dbValue;
                 mc.DataValue = GetEpoPropertyValue(mc);
             }
         }
         //---------------------------------------------------------------------
-        public virtual object GetDbValue(TMetaColumn mc) {
+        public virtual object GetDbValue(TMetaColumn mc)
+        {
             object dataValue = this.GetEpoPropertyValue(mc);
-            if(mc.IsGenericType) {
-                if(dataValue == null)
+            if (mc.IsGenericType)
+            {
+                if (dataValue == null)
                     return DBNull.Value;
                 else
                     return dataValue;
             }
             Type dotNetType = mc.UnderlyingType;
             object customNullValue = mc.MappingAttribute.NullValue;
-            if(customNullValue == null) {
+            if (customNullValue == null)
+            {
                 return TConvert.DataValue2DbValue(mc.DataType, dataValue);
             }
 
             /// CustomNullValue
-            if(customNullValue.GetType() != dotNetType) {
-                if(dotNetType == typeof(Decimal)) {          /// float to decimal
+            if (customNullValue.GetType() != dotNetType)
+            {
+                if (dotNetType == typeof(Decimal))
+                {          /// float to decimal
                     Decimal decima = Convert.ToDecimal(customNullValue);
                     return TConvert.DataValue2DbValue(dataValue, decima);
-                } else
+                }
+                else
                     throw new TException("nullValue.GetType() differ value.GetType");
-            } else
+            }
+            else
                 return TConvert.DataValue2DbValue(dataValue, customNullValue);
         }
         //---------------------------------------------------------------------
         public bool IsMarkDelete { get; set; }
-        public virtual void MarkDelete() {
-            if(PersistState == TPersistState.Added)
+        public virtual void MarkDelete()
+        {
+            if (PersistState == TPersistState.Added)
                 PersistState = TPersistState.Detached;
 
-            else if(PersistState == TPersistState.Opened)
+            else if (PersistState == TPersistState.Opened)
                 PersistState = TPersistState.MarkDeleted;
 
             //Selected = false;
             IsMarkDelete = true;
         }
         //---------------------------------------------------------------------
-        public virtual void UnMarkDelete() {
-            if(PersistState == TPersistState.Detached)
+        public virtual void UnMarkDelete()
+        {
+            if (PersistState == TPersistState.Detached)
                 PersistState = TPersistState.Added;
 
-            else if(PersistState == TPersistState.MarkDeleted)
+            else if (PersistState == TPersistState.MarkDeleted)
                 PersistState = TPersistState.Opened;
 
             IsMarkDelete = false;
         }
         //---------------------------------------------------------------------
-        public void Detach() {
+        public void Detach()
+        {
             throw new NotImplementedException();
         }
         //---------------------------------------------------------------------
-        public virtual void Delete() {
+        public virtual void Delete()
+        {
             DataAccess.DeleteById(Id);
         }
-        public virtual void DeepDelete() {
+        public virtual void DeepDelete()
+        {
             throw new NotImplementedException();
         }
         //----------------------------------------------------------
-        public override void Assign(object rhs) {
+        public override void Assign(object rhs)
+        {
             CEntity that = rhs as CEntity;
             TMetaEntity meta = GetMetaEntity(this.GetType());
-            foreach(TMetaColumn mc in meta.MetaTable.FullValueColumns) {
+            foreach (TMetaColumn mc in meta.MetaTable.FullValueColumns)
+            {
                 //if (mc.ColumnName == "CAPTIONS_CN")
                 //    System.Diagnostics.Debug.WriteLine(mc.ColumnName);
 
@@ -685,27 +802,29 @@ namespace Fx.Common.Entity {
         }
         //--------------------------------------------------------------
         // TODO: Distinguish between Equals/Equal
-        public override bool Equals(object rhs) {
-            if(rhs == null)
+        public override bool Equals(object rhs)
+        {
+            if (rhs == null)
                 return false;
 
-            if(object.ReferenceEquals(this, rhs))
+            if (object.ReferenceEquals(this, rhs))
                 return true;
 
-            if(this.GetType() != rhs.GetType())
+            if (this.GetType() != rhs.GetType())
                 return false;
 
             CEntity that = rhs as CEntity;
-            if(that == null)
+            if (that == null)
                 return false;
 
 
             TMetaEntity me = GetMetaEntity(this.GetType());
-            if(me == null)
+            if (me == null)
                 return base.Equals(rhs);
 
             bool b = true;
-            foreach(TMetaColumn mc in me.MetaTable.FullValueColumns) {
+            foreach (TMetaColumn mc in me.MetaTable.FullValueColumns)
+            {
                 //if (!cm.IsCompare)
                 //    continue;
 
@@ -719,22 +838,24 @@ namespace Fx.Common.Entity {
             return b;
         }
         //----------------------------------------------------------
-        public virtual void Assign(TMetaEntity me, CEntity rhs) {
+        public virtual void Assign(TMetaEntity me, CEntity rhs)
+        {
             TMetaTable mt = me.MetaTable;
 
             TInheritMappingType inheritType = mt.InheritMappingType;
             TMetaColumnCollection mcs = null;
-            if(inheritType == TInheritMappingType.TablePerConcreteClass)
+            if (inheritType == TInheritMappingType.TablePerConcreteClass)
                 mcs = mt.FullValueColumns;
             else
-                if(inheritType == TInheritMappingType.TablePerSubClass)
+                if (inheritType == TInheritMappingType.TablePerSubClass)
                 mcs = mt.ValueColumns;
 
             CEntity that = rhs as CEntity;
-            foreach(TMetaColumn mc in mcs) {
+            foreach (TMetaColumn mc in mcs)
+            {
                 //if (!cm.IsAssign)
                 //    continue;
-                if(mc.MemberName == "Captions.Cn (Assign)")
+                if (mc.MemberName == "Captions.Cn (Assign)")
                     System.Diagnostics.Debug.WriteLine(mc.MemberName);
 
                 object v2 = that.GetEpoPropertyValue(mc);
@@ -742,38 +863,41 @@ namespace Fx.Common.Entity {
             }
         }
         //----------------------------------------------------------
-        public virtual void Assign(Type t, CEntity rhs) {
+        public virtual void Assign(Type t, CEntity rhs)
+        {
             TMetaEntity me = TMetaRegistry.Default.GetMeta(t);
             Assign(me, rhs);
         }
         //--------------------------------------------------------------
-        public bool Equals(Type t, object rhs) {
-            if(rhs == null)
+        public bool Equals(Type t, object rhs)
+        {
+            if (rhs == null)
                 return false;
 
-            if(object.ReferenceEquals(this, rhs))
+            if (object.ReferenceEquals(this, rhs))
                 return true;
 
-            if(this.GetType() != rhs.GetType())
+            if (this.GetType() != rhs.GetType())
                 return false;
 
             CEntity that = rhs as CEntity;
-            if(that == null)
+            if (that == null)
                 return false;
 
             TMetaEntity meta = TMetaRegistry.Default.GetMeta(t);
             TMetaTable mt = meta.MetaTable;
             TInheritMappingType inheritType = mt.InheritMappingType;
             TMetaColumnCollection mcs = null;
-            if(inheritType == TInheritMappingType.TablePerConcreteClass)
+            if (inheritType == TInheritMappingType.TablePerConcreteClass)
                 mcs = mt.FullValueColumns;
-            else if(inheritType == TInheritMappingType.TablePerSubClass)
+            else if (inheritType == TInheritMappingType.TablePerSubClass)
                 mcs = mt.ValueColumns;
             bool b = true;
-            foreach(TMetaColumn mc in mcs) {
+            foreach (TMetaColumn mc in mcs)
+            {
                 //if (!cm.IsCompare)
                 //    continue;
-                if(mc.MemberName == "Captions.Cn (Equal)")
+                if (mc.MemberName == "Captions.Cn (Equal)")
                     System.Diagnostics.Debug.WriteLine(mc.MemberName);
                 object v1 = this.GetEpoPropertyValue(mc);
                 object v2 = that.GetEpoPropertyValue(mc);
@@ -783,30 +907,37 @@ namespace Fx.Common.Entity {
             return b;
         }
         //----------------------------------------------------------
-        public virtual void DeepLoad() {
+        public virtual void DeepLoad()
+        {
             throw new Exception("The method  is not implemented.");
         }
         //----------------------------------------------------------
-        public virtual void DeepLoad(string id) {
+        public virtual void DeepLoad(string id)
+        {
             throw new Exception("The method  is not implemented.");
         }
         //----------------------------------------------------------
-        public virtual void DeepLoad(DataTable dataTable) {
+        public virtual void DeepLoad(DataTable dataTable)
+        {
             throw new Exception("The method  is not implemented.");
         }
         //---------------------------------------------------------------------
-        public virtual void DeepLoad(DataRow row) {
+        public virtual void DeepLoad(DataRow row)
+        {
             throw new Exception("The method  is not implemented.");
         }
         //-------------------------------------------------------------------
-        public virtual void LazyLoad() {
+        public virtual void LazyLoad()
+        {
         }
         //----------------------------------------------------------
-        public virtual void DeepSave() {
+        public virtual void DeepSave()
+        {
             throw new Exception("The method  is not implemented.");
         }
         //-------------------------------------------------------------------
-        public virtual void LazySave() {
+        public virtual void LazySave()
+        {
         }
     }
 }
