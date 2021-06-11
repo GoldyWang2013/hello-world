@@ -75,8 +75,8 @@ namespace Fx.Common.Entity {
             PersistState = TPersistState.Added;
             HasSelectedField = true;
             IsMarkDelete = false;
-            //TODO:RegisterValidators
-            //RegisterValidators();
+            TODO:RegisterValidators
+            RegisterValidators();
         }
         //----------------------------------------------------------
         public virtual string CreateCoid() {
@@ -175,14 +175,14 @@ namespace Fx.Common.Entity {
                 TMetaTable mt2 = me2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
 
-                ///µ¥±í¼Ì³Ğ--µ¥±í´æÖü 
+                ///å•è¡¨ç»§æ‰¿--å•è¡¨å­˜è´® 
                 if(inheritType == TInheritMappingType.TablePerConcreteClass) {
                     Load(no, me2);
                     if(IsBakMode)
                         AcceptChanges(me2);
                     break;
                 }
-                /// ¶à±í¼Ì³Ğ--·Ö±í´æÖü
+                /// å¤šè¡¨ç»§æ‰¿--åˆ†è¡¨å­˜è´®
                 else if(inheritType == TInheritMappingType.TablePerSubClass) {
                     Load(no, me2);
                     if(IsBakMode)
@@ -201,14 +201,14 @@ namespace Fx.Common.Entity {
             Load(dataTable, me);
         }
         ////----------------------------------------------------------
-        // ²»Ö§³Ö¼Ì³Ğ
+        // ä¸æ”¯æŒç»§æ‰¿
         //public virtual void Load(string id)
         //{
         //    DataTable dataTable = DataAccess.SelectById(id);
         //    Load(dataTable);
         //}
         //----------------------------------------------------------
-        // Ö§³Ö¼Ì³Ğ
+        // æ”¯æŒç»§æ‰¿
         public virtual void Load(string id) {
             BeforeLoad();
             Type t2 = this.GetType();
@@ -217,7 +217,7 @@ namespace Fx.Common.Entity {
                 TMetaTable mt2 = me2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
 
-                ///µ¥±í¼Ì³Ğ--µ¥±í´æÖü 
+                ///å•è¡¨ç»§æ‰¿--å•è¡¨å­˜è´® 
                 if(inheritType == TInheritMappingType.TablePerConcreteClass) {
                     Load(id, me2);
                     if(IsBakMode)
@@ -225,7 +225,7 @@ namespace Fx.Common.Entity {
 
                     break;
                 }
-                /// ¶à±í¼Ì³Ğ--·Ö±í´æÖü
+                /// å¤šè¡¨ç»§æ‰¿--åˆ†è¡¨å­˜è´®
                 else if(inheritType == TInheritMappingType.TablePerSubClass) {
                     Load(id, me2);
                     if(IsBakMode)
@@ -408,8 +408,8 @@ namespace Fx.Common.Entity {
             TMetaEntity meta = GetMetaEntity(this.GetType());
             TInheritMappingType inheritType = meta.MetaTable.InheritMappingType;
 
-            // PerConcreteÓëPerSubClassÍ¬Ñù¶¼µ÷ÓÃ´Ëº¯ÊıSave(meta)
-            // ÔÚ´Ëº¯ÊıÖĞ£¬È¥½øÒ»²½Çø·ÖMappingType
+            // PerConcreteä¸PerSubClassåŒæ ·éƒ½è°ƒç”¨æ­¤å‡½æ•°Save(meta)
+            // åœ¨æ­¤å‡½æ•°ä¸­ï¼Œå»è¿›ä¸€æ­¥åŒºåˆ†MappingType
             // NG
 
             if(inheritType == TInheritMappingType.TablePerConcreteClass)
@@ -438,11 +438,11 @@ namespace Fx.Common.Entity {
             m_Dirty = TBoolEx.Null;
         }
         //----------------------------------------------------------
-        // Í¬±í´¢´æ
+        // åŒè¡¨å‚¨å­˜
         private void SaveTablePerConcreteClass(TMetaEntity meta) {
             try {
-                // PerConcreteÓëPerSubClassÍ¬Ñù¶¼µ÷ÓÃº¯ÊıSave(meta)
-                // ÔÚ´Ëº¯ÊıÖĞ£¬È¥½øÒ»²½Çø·ÖMappingType
+                // PerConcreteä¸PerSubClassåŒæ ·éƒ½è°ƒç”¨å‡½æ•°Save(meta)
+                // åœ¨æ­¤å‡½æ•°ä¸­ï¼Œå»è¿›ä¸€æ­¥åŒºåˆ†MappingType
                 // NG
                 Save(meta);
             } catch(TDataSilentlyChangedException e1) {
@@ -453,7 +453,7 @@ namespace Fx.Common.Entity {
             }
         }
         //----------------------------------------------------------
-        // ·Ö±í´¢´æ
+        // åˆ†è¡¨å‚¨å­˜
         private void SaveTablePerSubClass() {
             Type t2 = this.GetType();
             while(t2 != typeof(CEntity)) {
@@ -461,8 +461,8 @@ namespace Fx.Common.Entity {
                 TMetaTable mt2 = meta2.MetaTable;
                 TInheritMappingType inheritType = mt2.InheritMappingType;
                 try {
-                    // PerConcreteÓëPerSubClassÍ¬Ñù¶¼µ÷ÓÃº¯ÊıSave(meta)
-                    // ÔÚ´Ëº¯ÊıÖĞ£¬È¥½øÒ»²½Çø·ÖMappingType
+                    // PerConcreteä¸PerSubClassåŒæ ·éƒ½è°ƒç”¨å‡½æ•°Save(meta)
+                    // åœ¨æ­¤å‡½æ•°ä¸­ï¼Œå»è¿›ä¸€æ­¥åŒºåˆ†MappingType
                     // NG
                     Save(meta2);
                 } catch(TDataSilentlyChangedException e2) {
@@ -476,11 +476,11 @@ namespace Fx.Common.Entity {
         }
         //----------------------------------------------------------
         public void Save(TMetaEntity me) {
-            // PerConcreteÓëPerSubClassÍ¬Ñù¶¼µ÷ÓÃº¯ÊıSave(meta)
-            // ÔÚ´Ëº¯ÊıÖĞ£¬È¥½øÒ»²½Çø·ÖMappingType
+            // PerConcreteä¸PerSubClassåŒæ ·éƒ½è°ƒç”¨å‡½æ•°Save(meta)
+            // åœ¨æ­¤å‡½æ•°ä¸­ï¼Œå»è¿›ä¸€æ­¥åŒºåˆ†MappingType
             // NG
 
-            /// ×¢Òâ£¬Meta·Ö¼¶´æÖü¡£·Ö±íÊ±Òª²¹Id
+            /// æ³¨æ„ï¼ŒMetaåˆ†çº§å­˜è´®ã€‚åˆ†è¡¨æ—¶è¦è¡¥Id
 
             TracSave(me);
             CDataAccess access = Context.GetDataAccess(me);
