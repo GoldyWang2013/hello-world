@@ -64,6 +64,7 @@ namespace Fx.Common.Entity {
 		}
 		//---------------------------------------------------------------------
 		public static string GetPropertyName<T>(Expression<Func<T>> expression) {
+			/// ???
 			return GetPropertyNameFast(expression);
 		}
 		//---------------------------------------------------------------------
@@ -90,6 +91,7 @@ namespace Fx.Common.Entity {
 		//---------------------------------------------------
 		public string GetPropertyNameTest() {
 			var idName = GetProperty(() => Id);
+			// Good
 			//var bbb = GetProperty(() => BookmarkName );
 			return null;
 		}
